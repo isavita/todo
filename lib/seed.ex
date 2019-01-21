@@ -1,9 +1,9 @@
 defmodule Seed do
   def init_data do
-    {:ok, cache_pid} = Todo.Cache.start()
-    a = Todo.Cache.server_process(cache_pid, "alexs list")
-    b = Todo.Cache.server_process(cache_pid, "bobs list")
-    c = Todo.Cache.server_process(cache_pid, "clairs list")
+    {:ok, _} = Todo.System.start_link()
+    a = Todo.Cache.server_process("alexs list")
+    b = Todo.Cache.server_process("bobs list")
+    c = Todo.Cache.server_process("clairs list")
 
     Enum.each(1..500, fn i ->
       Todo.Server.add_entry(a, %{date: ~D[2018-12-19], title: "Dentist_a_#{i}"})
