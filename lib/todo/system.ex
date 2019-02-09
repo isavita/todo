@@ -3,7 +3,7 @@ defmodule Todo.System do
     Supervisor.start_link([
       Todo.ProcessRegistry,
       %{id: Todo.Database, start: {Todo.Database, :start_link, []}},
-      %{id: Todo.Cache, start: {Todo.Cache, :start_link, [nil]}},
+      %{id: Todo.Cache, start: {Todo.Cache, :start_link, []}},
     ], strategy: :one_for_one)
   end
 end
