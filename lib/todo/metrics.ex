@@ -13,7 +13,7 @@ defmodule Todo.Metrics do
 
   defp collect_metrics do
     [
-      memory_usage: "#{Float.round(:erlang.memory(:total)/ (1024 * 1024), 3)} MB",
+      memory_usage: "#{Float.round(:erlang.memory(:total) / (1024 * 1024), 3)} MB",
       process_count: :erlang.system_info(:process_count)
     ]
   end

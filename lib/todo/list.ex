@@ -9,7 +9,7 @@ defmodule Todo.List do
     new_entry = Map.put(entry, :id, todo_list.auto_id)
     new_entries = Map.put(todo_list.entries, todo_list.auto_id, new_entry)
 
-    %Todo.List{todo_list | entries: new_entries, auto_id: (todo_list.auto_id + 1)}
+    %Todo.List{todo_list | entries: new_entries, auto_id: todo_list.auto_id + 1}
   end
 
   def entries(todo_list) do
@@ -19,7 +19,7 @@ defmodule Todo.List do
   def entries(todo_list, on) do
     todo_list
     |> entries()
-    |> Enum.filter(& &1[:date] == on)
+    |> Enum.filter(&(&1[:date] == on))
   end
 
   def update_entry(todo_list, %{} = new_entry) do

@@ -31,7 +31,7 @@ defmodule Todo.Server do
   def handle_cast({:add_entry, entry}, {name, todo_list}) do
     new_todo_list = Todo.List.add_entry(todo_list, entry)
     Todo.Database.store(name, new_todo_list)
-    {:noreply,  {name, new_todo_list}}
+    {:noreply, {name, new_todo_list}}
   end
 
   @impl GenServer

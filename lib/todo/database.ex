@@ -3,6 +3,7 @@ defmodule Todo.Database do
   @pool_size 3
 
   def start_link(db_folder \\ @db_folder)
+
   def start_link(db_folder) do
     IO.puts("Starting to-do database.")
     File.mkdir_p!(db_folder)
