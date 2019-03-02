@@ -18,6 +18,8 @@ defmodule SimpleRegistry do
   @impl true
   def init(:ok) do
     Process.flag(:trap_exit, true)
+    :ets.new(__MODULE__, [:set, :public, :named_table])
+
     {:ok, %{}}
   end
 
@@ -26,11 +28,11 @@ defmodule SimpleRegistry do
     pid = Process.whereis(name)
 
     response =
-      if Map.has_key?(state, name) do
-        :error
-      else
+      if :ets.insert_new(__MODULE__, {name, pid}) do
         Process.link(pid)
         :ok
+      else
+        :error
       end
 
     {:reply, response, Map.put_new(state, name, pid)}
@@ -38,16 +40,19 @@ defmodule SimpleRegistry do
 
   @impl true
   def handle_call({:whereis, name}, _from, state) do
-    {:reply, Map.get(state, name), state}
+    response =
+      case :ets.lookup(__MODULE__, name) do
+        [{_name, pid}] -> pid
+        _ -> nil
+      end
+
+    {:reply, response, state}
   end
 
   @impl true
   def handle_info({:EXIT, pid, reason}, state) do
-    state =
-      case Enum.find(state, fn {_key, value} -> value == pid end) do
-        {name, _pid} -> Map.delete(state, name)
-        nil -> state
-      end
+    IO.inspect(reason)
+    :ets.match_delete(__MODULE__, {:"$1", pid})
 
     {:noreply, state}
   end

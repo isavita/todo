@@ -47,7 +47,7 @@ defmodule Todo.Server do
   end
 
   @impl GenServer
-  def handle_info(:timeout,  {name, todo_list}) do
+  def handle_info(:timeout, {name, todo_list}) do
     IO.puts("Stopping to-do server for #{name}")
     {:stop, :normal, {name, todo_list}}
   end
