@@ -10,7 +10,10 @@ defmodule SimpleRegistry do
   end
 
   def whereis(name) do
-    GenServer.call(__MODULE__, {:whereis, name})
+    case :ets.lookup(__MODULE__, name) do
+      [{^name, pid}] -> pid
+      _ -> nil
+    end
   end
 
   # Callbacks
@@ -18,13 +21,13 @@ defmodule SimpleRegistry do
   @impl true
   def init(:ok) do
     Process.flag(:trap_exit, true)
-    :ets.new(__MODULE__, [:set, :public, :named_table])
+    :ets.new(__MODULE__, [:set, :public, :named_table, read_concurrency: true, write_concurrency: true])
 
-    {:ok, %{}}
+    {:ok, nil}
   end
 
   @impl true
-  def handle_call({:register, name}, _, state) do
+  def handle_call({:register, name}, _from, state) do
     pid = Process.whereis(name)
 
     response =
@@ -35,24 +38,12 @@ defmodule SimpleRegistry do
         :error
       end
 
-    {:reply, response, Map.put_new(state, name, pid)}
-  end
-
-  @impl true
-  def handle_call({:whereis, name}, _from, state) do
-    response =
-      case :ets.lookup(__MODULE__, name) do
-        [{_name, pid}] -> pid
-        _ -> nil
-      end
-
     {:reply, response, state}
   end
 
   @impl true
-  def handle_info({:EXIT, pid, reason}, state) do
-    IO.inspect(reason)
-    :ets.match_delete(__MODULE__, {:"$1", pid})
+  def handle_info({:EXIT, pid, _reason}, state) do
+    :ets.match_delete(__MODULE__, {:_, pid})
 
     {:noreply, state}
   end
