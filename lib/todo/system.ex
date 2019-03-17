@@ -4,7 +4,8 @@ defmodule Todo.System do
       [
         Todo.ProcessRegistry,
         Todo.Database,
-        %{id: Todo.Cache, start: {Todo.Cache, :start_link, []}}
+        %{id: Todo.Cache, start: {Todo.Cache, :start_link, []}},
+        Todo.Web
       ],
       strategy: :one_for_one
     )

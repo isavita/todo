@@ -23,7 +23,11 @@ defmodule Todo.MixProject do
   defp deps do
     [
       {:benchee, "~> 0.9", only: :dev},
-      {:poolboy, "~> 1.5"}
+      {:poolboy, "~> 1.5"},
+      {:cowboy, "~> 1.1"},
+      {:plug, "~> 1.4"},
+      {:plug_cowboy, "~> 1.0"},
+      {:poison, "~> 1.0"},
     ]
   end
 end
