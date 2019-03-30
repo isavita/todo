@@ -1,9 +1,8 @@
 defmodule Todo.Database do
-  @db_folder "./persist"
-  @pool_size 3
+  @pool_size 5
 
   def child_spec(_) do
-    File.mkdir_p!(@db_folder)
+    File.mkdir_p!(db_folder)
 
     :poolboy.child_spec(
       __MODULE__,
@@ -12,11 +11,24 @@ defmodule Todo.Database do
         worker_module: Todo.DatabaseWorker,
         size: 5
       ],
-      [@db_folder]
+      [db_folder]
     )
   end
 
   def store(key, data) do
+    {_results, bad_nodes} =
+      :rpc.multicall(
+        __MODULE__,
+        :store_local,
+        [key, data],
+        :timer.seconds(5)
+      )
+
+    Enum.each(bad_nodes, &IO.puts("Store failed on node #{&1}"))
+    :ok
+  end
+
+  def store_local(key, data) do
     :poolboy.transaction(
       __MODULE__,
       fn pid -> Todo.DatabaseWorker.store(pid, key, data) end,
@@ -29,5 +41,13 @@ defmodule Todo.Database do
       __MODULE__,
       fn pid -> Todo.DatabaseWorker.get(pid, key) end
     )
+  end
+
+  defp db_folder do
+    "./#{Application.get_env(:todo, :database_folder)}/#{node_name()}"
+  end
+
+  defp node_name do
+    "#{node()}" |> String.split("@") |> hd()
   end
 end
